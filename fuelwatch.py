@@ -1,25 +1,57 @@
 """
-fuelwatch wa - add description
+    fuelwatcher - A python module for scraping XML data from the Western
+    Australian governments Fuel Watch initiative.
 
-include copyright
+    <https://www.fuelwatch.wa.gov.au>
 
-include license
+        Copyright (C) 2018, Daniel Michaels
 """
 from pprint import pprint
+from xml.etree import ElementTree
+from utils import product, region, brand, suburb
 
+import logging
 import requests
 import requests_cache
-import logging
-from xml.etree import ElementTree
 
 logging.basicConfig(level=logging.INFO)
 
 
 class FuelWatch:
+    """Client for FuelWatch RSS Feed. """
 
     def __init__(self,
-                 url='http://fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS'):
+                 url='http://fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS',
+                 product=product, region=region, brand=brand, suburb=suburb):
         self.url = url
+        self._product = product
+        self._region = region
+        self._brand = brand
+        self._suburb = suburb
+
+    def validate_product(self, product):
+        if not product:
+            return True
+        else:
+            assert product in self._product, "Invalid Product Integer."
+
+    def validate_region(self, region):
+        if not region:
+            return True
+        else:
+            assert region in self._region, "Invalid Region Specified."
+
+    def validate_brand(self, brand):
+        if not brand:
+            return True
+        else:
+            assert brand in self._brand, "Invalid Brand."
+
+    def validate_suburb(self, suburb):
+        if not suburb:
+            return True
+        else:
+            assert suburb in self._suburb, "Invalid Suburb - Check Spelling"
 
     def query(self, product=None, suburb=None, region=None, brand=None,
               surrounding=None, day=None):
@@ -59,6 +91,11 @@ class FuelWatch:
         :return: byte-string content of url
         """
 
+        self.validate_product(product)
+        self.validate_brand(brand)
+        self.validate_region(region)
+        self.validate_suburb(suburb)
+
         payload = dict()
         payload['Product'] = product
         payload['Suburb'] = suburb
@@ -69,30 +106,26 @@ class FuelWatch:
         logging.info(payload)
 
         try:
-            resp = requests.get(self.url, timeout=30, params=payload)
+            response = requests.get(self.url, timeout=30, params=payload)
             requests_cache.install_cache()
-            logging.info(resp)
-            logging.info(resp.url)
-            if resp.status_code == 200:
-                return resp.content
-                # print('should go to self.parse now')
-                # results = resp.content
-                # return self.parse(results)
+            logging.info(response)
+            logging.info(response.url)
+            if response.status_code == 200:
+                return response.content
         except Exception as e:
             print(e)
 
     def get_raw_xml(self, result):
         """
-        Returns the full RSS response. Must be manually called.
+        Returns the full RSS response unparsed.
 
-        :param result:
-        :return:
+        :param result: url response.content from FuelWatch.query()
+
+        :return: byte string full RSS XML response
         """
-        print(result)
-        print('R\nA\nW\n')
-        pass
+        return result
 
-    def parse(self, result):
+    def get_parsed_xml(self, result):
         """
         Given page content parses through the RSS XML and returns only 'item'
         data which contains fuel station information.
@@ -132,12 +165,7 @@ class FuelWatch:
 
 
 api = FuelWatch()
-query = api.query()
-api.get_raw_xml(query)
-# query = api.query(product=1, region=5)
-# pprint(query)
-# a = next((item for item in query if float(item['price']) < 140))
-# print(a)
-# print(f'Total: {len(query)}'
-#       f'Total < 140c: {len(a)}')
-# resp = apr.parse(query)
+query = api.query(day='01/04/2018')
+# resp = api.get_raw_xml(query)
+resp = api.get_parsed_xml(query)
+pprint(resp)

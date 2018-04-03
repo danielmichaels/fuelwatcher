@@ -86,7 +86,7 @@ brand = {
     24: "Eagle"
 }
 
-suburbs = [
+suburb = [
     'Albany',
     'Alexander Heights',
     'Alfred Cove',
