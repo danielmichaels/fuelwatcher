@@ -6,7 +6,7 @@
 
         Copyright (C) 2018, Daniel Michaels
 """
-from utils import product, region, brand, suburb
+from .constants import product, region, brand, suburb
 from xml.etree import ElementTree
 
 import logging
