@@ -6,13 +6,11 @@
 
         Copyright (C) 2018, Daniel Michaels
 """
-from pprint import pprint
-from xml.etree import ElementTree
 from utils import product, region, brand, suburb
+from xml.etree import ElementTree
 
 import logging
 import requests
-import requests_cache
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,32 +27,33 @@ class FuelWatch:
         self._brand = brand
         self._suburb = suburb
 
-    def validate_product(self, product):
+    def validate_product(self, product: int) -> bool:
         if not product:
             return True
         else:
             assert product in self._product, "Invalid Product Integer."
 
-    def validate_region(self, region):
+    def validate_region(self, region: int) -> bool:
         if not region:
             return True
         else:
             assert region in self._region, "Invalid Region Specified."
 
-    def validate_brand(self, brand):
+    def validate_brand(self, brand: int) -> bool:
         if not brand:
             return True
         else:
             assert brand in self._brand, "Invalid Brand."
 
-    def validate_suburb(self, suburb):
+    def validate_suburb(self, suburb: str) -> bool:
         if not suburb:
             return True
         else:
             assert suburb in self._suburb, "Invalid Suburb - Check Spelling"
 
-    def query(self, product=None, suburb=None, region=None, brand=None,
-              surrounding=None, day=None):
+    def query(self, product: int = None, suburb: str = None,
+              region: int = None, brand: int = None, surrounding: str = None,
+              day: str = None):
         """
         Returns FuelWatch data based on query parameters
 
@@ -72,10 +71,12 @@ class FuelWatch:
         Full list found in utils.suburbs
 
         :param region: FuelWatch seperates WA into regions that take an
+
         integer. Refer to utils.region for a listing.
 
         :param brand: Takes in any valid registered WA fuel station. Refer to
         utils.brand for the full list.
+
         :param surrounding: boolean 'yes/no' that will return surrounding
         suburbs when used in conjuction with the suburb parameter. Must be set
         to 'no' explicitly, otherwise returns True.
@@ -107,7 +108,6 @@ class FuelWatch:
 
         try:
             response = requests.get(self.url, timeout=30, params=payload)
-            requests_cache.install_cache()
             logging.info(response)
             logging.info(response.url)
             if response.status_code == 200:
@@ -115,7 +115,7 @@ class FuelWatch:
         except Exception as e:
             print(e)
 
-    def get_raw_xml(self, result):
+    def get_raw_xml(self, result: bytes):
         """
         Returns the full RSS response unparsed.
 
@@ -125,7 +125,7 @@ class FuelWatch:
         """
         return result
 
-    def get_parsed_xml(self, result):
+    def get_parsed_xml(self, result: bytes):
         """
         Given page content parses through the RSS XML and returns only 'item'
         data which contains fuel station information.
@@ -162,10 +162,3 @@ class FuelWatch:
         logging.info(f'Here is the results: \n {parsed_results}')
 
         return parsed_results
-
-
-api = FuelWatch()
-query = api.query(day='01/04/2018')
-# resp = api.get_raw_xml(query)
-resp = api.get_parsed_xml(query)
-pprint(resp)
