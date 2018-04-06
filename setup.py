@@ -4,6 +4,8 @@ $ git tag X.Y.Z -m "Release X.Y.Z"
 $ git push --tags
 $ pip install --upgrade twine wheel
 $ python setup.py sdist bdist_wheel --universal
+$ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+    // ABOVE ONLY FOR TESTING
 $ twine upload dist/*
 """
 
