@@ -104,12 +104,9 @@ class FuelWatch:
         payload['Brand'] = brand
         payload['Surrounding'] = surrounding
         payload['Day'] = day
-        logging.info(payload)
 
         try:
             response = requests.get(self.url, timeout=30, params=payload)
-            logging.info(response)
-            logging.info(response.url)
             if response.status_code == 200:
                 return response.content
         except Exception as e:
@@ -135,11 +132,8 @@ class FuelWatch:
         :return: a list of dictionaries from the XML content.
         """
 
-        logging.info(result)
         dom = ElementTree.fromstring(result)
-        logging.info(f'DOM: {dom}')
         items = dom.findall('channel/item')
-        logging.info(f'Items: {items}')
 
         parsed_results = []
         for elem in items:
@@ -159,6 +153,5 @@ class FuelWatch:
             dic['site-features'] = elem.find('site-features').text
             parsed_results.append(dic)
 
-        logging.info(f'Here is the results: \n {parsed_results}')
-
         return parsed_results
+

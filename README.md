@@ -90,8 +90,8 @@ query = api.query(product=20) # product=20 is invalid
 
 ## Release History
 
-* 0.1.0rc2
-    * Minor formatting fixes
+* .1.0rc2
+     Minor formatting fixes
 * 0.1.0rc1
     * The first release candidate
 * 0.0.1
