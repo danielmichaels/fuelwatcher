@@ -3,7 +3,7 @@
    / ____/_  _____  / /      ______ _/ /______/ /_  ___  _____
   / /_  / / / / _ \/ / | /| / / __ `/ __/ ___/ __ \/ _ \/ ___/
  / __/ / /_/ /  __/ /| |/ |/ / /_/ / /_/ /__/ / / /  __/ /    
-/_/    \__,_/\___/_/ |__/|__/\__,_/\__/\___/_/ /_/\___/_/     v 0.1.0rc1
+/_/    \__,_/\___/_/ |__/|__/\__,_/\__/\___/_/ /_/\___/_/     v 0.1.0rc2
 ```
 
 # Fuelwatcher
@@ -11,7 +11,7 @@
 A simple python module that scrapes XML data from the government of Western Australia's FuelWatch initiative website making parsing a breeze.
 
 >Fuelwatch.wa.gov.au provides information on fuel prices by fuel type, location, brand and region within Western Australia. 
-> Fuelwatcher will parse the XML from the fuelwatch.wa.gov.au RSS feed. Giving the developer an easy way to manipulate the information.
+> Fuelwatcher will parse the XML from the fuelwatch.wa.gov.au RSS feed giving the developer an easy way to manipulate the information.
 
 ## Installation
 
@@ -90,6 +90,8 @@ query = api.query(product=20) # product=20 is invalid
 
 ## Release History
 
+* 0.1.0rc2
+    * Minor formatting fixes
 * 0.1.0rc1
     * The first release candidate
 * 0.0.1

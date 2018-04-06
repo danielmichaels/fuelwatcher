@@ -13,7 +13,7 @@ from codecs import open
 from setuptools import setup
 from os import path
 
-__VERSION__ = '0.1.0rc1'
+__VERSION__ = '0.1.0rc2'
 __URL__ = 'https://github.com/danielmichaels/fuelwatcher'
 __DOWNLOAD_URL__ = (__URL__ + '/tarball/' + __VERSION__)
 
