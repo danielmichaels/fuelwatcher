@@ -6,7 +6,7 @@
 
         Copyright (C) 2018, Daniel Michaels
 """
-from .constants import product, region, brand, suburb
+from .constants import PRODUCT, REGION, BRAND, SUBURB
 from xml.etree import ElementTree
 
 import logging
@@ -20,7 +20,7 @@ class FuelWatch:
 
     def __init__(self,
                  url='http://fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS',
-                 product=product, region=region, brand=brand, suburb=suburb):
+                 product=PRODUCT, region=REGION, brand=BRAND, suburb=SUBURB):
         self.url = url
         self._product = product
         self._region = region

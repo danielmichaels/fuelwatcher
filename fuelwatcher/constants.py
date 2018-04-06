@@ -1,4 +1,4 @@
-product = {
+PRODUCT = {
     1: "Unleaded Petrol",
     2: "Premium Unleaded",
     4: "Diesel",
@@ -7,7 +7,7 @@ product = {
     7: "B20 Diesel"
 }
 
-region = {
+REGION = {
     1: "Boulder",
     2: "Broome",
     3: "Busselton (Townsite)",
@@ -65,7 +65,7 @@ region = {
     56: "York"
 }
 
-brand = {
+BRAND = {
     2: "Ampol",
     3: "Better Choice",
     4: "BOC",
@@ -86,7 +86,7 @@ brand = {
     24: "Eagle"
 }
 
-suburb = [
+SUBURB = [
     'Albany',
     'Alexander Heights',
     'Alfred Cove',
