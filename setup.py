@@ -3,19 +3,30 @@ Publish a new version:
 $ git tag X.Y.Z -m "Release X.Y.Z"
 $ git push --tags
 $ pip install --upgrade twine wheel
-$ python setup.py sdist bdist_wheel --universal
-$ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+$ python setup.p sdist
+$ twine upload -r testpypi dist/*
     // ABOVE ONLY FOR TESTING
-$ twine upload dist/*
+$ twine upload -r pypi dist/*
 """
 
 from codecs import open
-from setuptools import setup
+from setuptools import setup, find_packages
 from os import path
 
-__VERSION__ = '0.1.0'
-__URL__ = 'https://github.com/danielmichaels/fuelwatcher'
-__DOWNLOAD_URL__ = (__URL__ + '/tarball/' + __VERSION__)
+NAME = 'fuelwatcher'
+VERSION = '0.1.1'
+DESCRIPTION = 'A simple XML scraper for FuelWatch.wa.gov.au fuel prices',
+URL = 'https://github.com/danielmichaels/fuelwatcher'
+DOWNLOAD_URL = (URL + '/tarball/' + VERSION)
+AUTHOR = 'Daniel Michaels'
+AUTHOR_EMAIL = 'dans.address@outlook.com'
+REQUIRES_PYTHON = '>= Python 3.5'
+
+KEYWORDS = ['fuelwatch', 'western australia', 'fuel watch rss'],
+# Include what dependancies it requires:
+REQUIRED = [
+    'requests'
+]
 
 here = path.abspath(path.dirname(__file__))
 
@@ -23,17 +34,20 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='fuelwatcher',
-    packages=['fuelwatcher'],
-    version=__VERSION__,
-    description='A simple XML scraper for FuelWatch.wa.gov.au fuel prices',
+    name=NAME,
+    version=VERSION,
+    description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    author='Daniel Michaels',
-    author_email='dans.address@outlook.com',
-    url=__URL__,
-    download_url=__DOWNLOAD_URL__,
-    keywords=['fuelwatch', 'western australia', 'fuel watch rss'],
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
+    url=URL,
+    download_url=DOWNLOAD_URL,
+    install_requires=REQUIRED,
+    include_package_data=True,
+    license='MIT',
+    packages=find_packages(exclude=('tests')),
+    keywords=KEYWORDS,
     classifiers=[
         #   3 - Alpha
         #   4 - Beta

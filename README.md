@@ -90,8 +90,12 @@ query = api.query(product=20) # product=20 is invalid
 
 ## Release History
 
-* .1.0rc2
-     Minor formatting fixes
+* 0.1.1
+    * Include correct packages in setup.py
+* 0.1.0
+    * First release live to PyPi
+* 0.1.0rc2
+    * Minor formatting fixes
 * 0.1.0rc1
     * The first release candidate
 * 0.0.1
