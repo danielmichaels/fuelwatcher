@@ -22,7 +22,6 @@ AUTHOR = 'Daniel Michaels'
 AUTHOR_EMAIL = 'dans.address@outlook.com'
 REQUIRES_PYTHON = '>= Python 3.5'
 
-KEYWORDS = ['fuelwatch', 'western australia', 'fuel watch rss'],
 # Include what dependancies it requires:
 REQUIRED = [
     'requests'
@@ -47,7 +46,6 @@ setup(
     include_package_data=True,
     license='MIT',
     packages=find_packages(exclude=('tests')),
-    keywords=KEYWORDS,
     classifiers=[
         #   3 - Alpha
         #   4 - Beta
@@ -57,5 +55,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6', ]
+        'Programming Language :: Python :: 3.6'
+    ]
 )
