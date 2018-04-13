@@ -164,8 +164,8 @@ class FuelWatch:
         return self._xml
 
     @property
-    def to_json(self):
-        xml = self._xml
+    def get_json(self):
+        xml = self.get_xml
         json_results = json.dumps(xml, indent=4, ensure_ascii=True)
         self._json = json_results
 

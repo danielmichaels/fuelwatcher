@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 from os import path
 
 NAME = 'fuelwatcher'
-VERSION = '0.1.1'
+VERSION = '0.2.0'
 DESCRIPTION = 'A simple XML scraper for FuelWatch.wa.gov.au fuel prices',
 URL = 'https://github.com/danielmichaels/fuelwatcher'
 DOWNLOAD_URL = (URL + '/tarball/' + VERSION)
