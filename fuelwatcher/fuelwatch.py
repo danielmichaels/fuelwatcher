@@ -10,6 +10,7 @@ from .constants import PRODUCT, REGION, BRAND, SUBURB
 from xml.etree import ElementTree
 
 import logging
+import json
 import requests
 
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +27,9 @@ class FuelWatch:
         self._region = region
         self._brand = brand
         self._suburb = suburb
+        self._json = None
+        self._xml = None
+        self._raw = None
 
     def validate_product(self, product: int) -> bool:
         if not product:
@@ -108,11 +112,14 @@ class FuelWatch:
         try:
             response = requests.get(self.url, timeout=30, params=payload)
             if response.status_code == 200:
-                return response.content
+                self._raw = response.content
+                # return self._raw
+                return self._raw
         except Exception as e:
             print(e)
 
-    def get_raw_xml(self, result: bytes):
+    @property
+    def get_raw(self):
         """
         Returns the full RSS response unparsed.
 
@@ -120,9 +127,10 @@ class FuelWatch:
 
         :return: byte string full RSS XML response
         """
-        return result
+        return self._raw
 
-    def get_parsed_xml(self, result: bytes):
+    @property
+    def get_xml(self):
         """
         Given page content parses through the RSS XML and returns only 'item'
         data which contains fuel station information.
@@ -132,10 +140,10 @@ class FuelWatch:
         :return: a list of dictionaries from the XML content.
         """
 
-        dom = ElementTree.fromstring(result)
+        dom = ElementTree.fromstring(self._raw)
         items = dom.findall('channel/item')
 
-        parsed_results = []
+        self._xml = []
         for elem in items:
             dic = dict()
 
@@ -151,7 +159,14 @@ class FuelWatch:
             dic['latitude'] = elem.find('latitude').text
             dic['longitude'] = elem.find('longitude').text
             dic['site-features'] = elem.find('site-features').text
-            parsed_results.append(dic)
+            self._xml.append(dic)
 
-        return parsed_results
+        return self._xml
 
+    @property
+    def to_json(self):
+        xml = self._xml
+        json_results = json.dumps(xml, indent=4, ensure_ascii=True)
+        self._json = json_results
+
+        return self._json

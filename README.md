@@ -34,7 +34,7 @@ api = FuelWatch()
 
 query = api.query(product=2, region=25, day='yesterday')
 # returns byte string of xml.
-parsed_query = api.get_parsed_xml(query)
+parsed_query = api.get_xml(query)
 # iterates over each fuel station entry in the byte string
 # and returns list of dictionaries in human readable text.
 
@@ -43,12 +43,12 @@ print(parsed_query)
 >>>> [{'title': '138.5: Puma Bayswater', 'description': 'Address: 502 Guildford Rd, BAYSWATER, Phone: (08) 9379 1322, Open 24 hours', 'brand': 'Puma', 'date': '2018-04-05', 'price': '138.5', 'trading-name': 'Puma Bayswater', 'location': 'BAYSWATER', 'address': '502 Guildford Rd', 'phone': '(08) 9379 1322', 'latitude': '-31.919556', 'longitude': '115.929069', 'site-features': ', Open 24 hours'} ..snip.. ]
 ```
 
-For most operations the `get_parsed_results()` method will be sufficient. If the developer wants to parse the raw RSS XML then the `get_raw_xml()` method is available.
+For most operations the `get_parsed_results()` method will be sufficient. If the developer wants to parse the raw RSS XML then the `get_raw()` method is available.
 
 ```python
-raw_xml = api.get_raw_xml(query)
+get_raw = api.get_raw(query)
 
-print(raw_xml)
+print(get_raw)
 
 (b'<?xml version="1.0" encoding="UTF-8"?>\r\n<rss version="2.0"><channel><title>FuelWatch Prices For North of River</title><ttl>720</ttl><link>http://www.fuelwatch.wa.gov.au</link><description>05/04/2018 - North of River</description><language>en-us</language><copyright>Copyright 2005 FuelWatch... snip...</item></channel></rss>\r\n')
 ```
