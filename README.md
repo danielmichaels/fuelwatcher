@@ -3,12 +3,12 @@
    / ____/_  _____  / /      ______ _/ /______/ /_  ___  _____
   / /_  / / / / _ \/ / | /| / / __ `/ __/ ___/ __ \/ _ \/ ___/
  / __/ / /_/ /  __/ /| |/ |/ / /_/ / /_/ /__/ / / /  __/ /    
-/_/    \__,_/\___/_/ |__/|__/\__,_/\__/\___/_/ /_/\___/_/     v 0.2.0
+/_/    \__,_/\___/_/ |__/|__/\__,_/\__/\___/_/ /_/\___/_/     v 0.2.1
 ```
 
 # Fuelwatcher
 
-A simple python module that scrapes XML data from the government of Western Australia's FuelWatch initiative website making parsing a breeze.
+A simple python module that scrapes XML data from the government of Western Australia's FuelWatch website that makes parsing a breeze.
 
 >Fuelwatch.wa.gov.au provides information on fuel prices by fuel type, location, brand and region within Western Australia. 
 > Fuelwatcher will parse the XML from the fuelwatch.wa.gov.au RSS feed giving the developer an easy way to manipulate the information.
@@ -28,19 +28,25 @@ pip install fuelwatcher
 ### Basic Usage
 
 ```python
-from fuelwatch import FuelWatch
+from fuelwatcher import FuelWatch
 
 api = FuelWatch()
 
-api.query(product=2, region=25, day='yesterday')
 # returns byte string of xml.
-xml_query = api.get_xml
+api.query(product=2, region=25, day='yesterday')
+
 # iterates over each fuel station entry in the byte string
-# and returns list of dictionaries in human readable text.
+# and returns list of dictionaries in human readable text
+xml_query = api.get_xml
 
-print(parsed_query)
+print(xml_query)
 
->>>> [{'title': '138.5: Puma Bayswater', 'description': 'Address: 502 Guildford Rd, BAYSWATER, Phone: (08) 9379 1322, Open 24 hours', 'brand': 'Puma', 'date': '2018-04-05', 'price': '138.5', 'trading-name': 'Puma Bayswater', 'location': 'BAYSWATER', 'address': '502 Guildford Rd', 'phone': '(08) 9379 1322', 'latitude': '-31.919556', 'longitude': '115.929069', 'site-features': ', Open 24 hours'} ..snip.. ]
+>>>> [{'title': '138.5: Puma Bayswater', 'description': 'Address: 502 Guildford Rd, BAYSWATER, Phone: (08) 9379 1322, Open 24 hours', 'brand': 'Puma', 'date': '2018-04-05', 'price': '138.5', 'trading-name': 'Puma Bayswater', 'location': 'BAYSWATER', 'address': '502 Guildford Rd', 'phone': '(08) 9379 1322', 'latitude': '-31.919556', 'longitude': '115.929069', 'site-features': ', Open 24 hours'} ..snip... '}]
+
+# python dictionary parsing
+print(xml_query[0]['title'])
+>>>> '138.5: Puma Bayswater'
+
 ```
 
 Fuelwatcher can also transform the XML into JSON format. It is as simple as calling the `get_json` method.
@@ -68,6 +74,7 @@ json_response = api.get_json
 ```
 
 For most operations the `get_xml()` or `get_json()` method will be sufficient. If the developer wants to parse the raw RSS XML then the `get_raw()` method is available.
+This will return bytes.
 
 ```python
 get_raw = api.get_raw
@@ -75,9 +82,15 @@ get_raw = api.get_raw
 print(get_raw)
 
 >>>> (b'<?xml version="1.0" encoding="UTF-8"?>\r\n<rss version="2.0"><channel><title>FuelWatch Prices For North of River</title><ttl>720</ttl><link>http://www.fuelwatch.wa.gov.au</link><description>05/04/2018 - North of River</description><language>en-us</language><copyright>Copyright 2005 FuelWatch... snip...</item></channel></rss>\r\n')
+
+print(type(get_raw))
+
+>>>> <class 'bytes'>
+
 ```
 
-The query method takes several keyword arguments. By defaults it will return every fuel station across Western Australia.
+The query method takes several keyword arguments. 
+A query without any arguments will return *all* of today's Unleaded stations in Western Australia.
 
 As guide query takes the following kwargs
 
@@ -86,24 +99,17 @@ def query(self, product: int = None, suburb: str = None, region: int = None,
             brand: int = None, surrounding: str = None, day: str = None):
 ```
 
-Of importance if `suburb` is set, then `surrounding` can set to `no` or left as `None`; it defaults to `yes` at the API endpoint. Setting `region` with `suburb` and `surrounding` will have unexpected results and is best left to their default settings.
+**Note**
 
-Simply put, if you want just one `suburb` then set `surrounding='no'` else leave the default. Only one `suburb` can be set per query. If a `region` is selected, do not set `surrounding` or `suburb`
+If `suburb` is set then `surrounding` will default to `yes`. To get only the suburb, and not surrounding areas an explicit `surrounding='no'` must be called. 
 
-Doesn't make sense? Try this table.
+Setting `region` with `suburb` and `surrounding` will have unexpected results and are best not mixed together.
 
-PARAMETERS | OPTION 1 | OPTION 2
------------|----------|---------
-suburb | Y | N
-region | N | Y
-surrounding | Y or N | N
-product | Y | Y
-brand | Y | Y
-day | Y | Y
+Simply put, if you want just one `suburb` then set `surrounding='no'`, else leave the default. Only one `suburb` can be set per query. If a `region` is selected, do not set `surrounding` or `suburb`.
 
 A list of valid suburbs, brands, regions and products (fuel types) can be found in [constants.py](https://github.com/danielmichaels/fuelwatcher/blob/master/fuelwatcher/constants.py) 
 
-Fuelwatcher will run validation on the `query` method and throw AssertionError is an invalid integer or string is input
+Fuelwatcher will run validation on the `query` method and throw AssertionError if an invalid integer or string is input
 
 ```python
 api.query(product=20) # product=20 is invalid
@@ -114,8 +120,10 @@ api.query(product=20) # product=20 is invalid
 
 ## Release History
 
+* 0.2.1
+    * README.md updated
 * 0.2.0
-    * __Braking Change!__
+    * __Breaking Change!__
     * @property added raw, xml and json methods
     * json output now supported
 * 0.1.1
@@ -148,5 +156,3 @@ All requests, ideas or improvements are welcomed!
 ## Inspired by..
 
 A local python meetup group idea that turned into a PyPi package for anyone to use!
-
-<!-- Markdown link & img dfn's -->
