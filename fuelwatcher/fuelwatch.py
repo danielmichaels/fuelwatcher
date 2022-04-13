@@ -6,6 +6,8 @@
 
         Copyright (C) 2018, Daniel Michaels
 """
+import random
+
 from .constants import PRODUCT, REGION, BRAND, SUBURB
 from xml.etree import ElementTree
 
@@ -30,6 +32,25 @@ class FuelWatch:
         self._json = None
         self._xml = None
         self._raw = None
+
+    @staticmethod
+    def user_agent():
+        """
+        A static method which returns a random user agent for sending with each request.
+        """
+        user_agents = [
+            "Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1)",
+            "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko",
+            "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)",
+            "Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 5.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36",
+        ]
+        agent = random.choice(user_agents)
+
+        return agent
 
     def validate_product(self, product: int) -> bool:
         if not product:
@@ -110,10 +131,14 @@ class FuelWatch:
         payload['Day'] = day
 
         try:
-            response = requests.get(self.url, timeout=30, params=payload)
+            response = requests.get(
+                self.url,
+                timeout=30,
+                params=payload,
+                headers={"User-Agent": self.user_agent()},
+            )
             if response.status_code == 200:
                 self._raw = response.content
-                # return self._raw
                 return self._raw
         except Exception as e:
             print(e)
