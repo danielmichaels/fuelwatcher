@@ -6,6 +6,8 @@
 
         Copyright (C) 2018, Daniel Michaels
 """
+import random
+
 from .constants import PRODUCT, REGION, BRAND, SUBURB
 from xml.etree import ElementTree
 
@@ -30,6 +32,29 @@ class FuelWatch:
         self._json = None
         self._xml = None
         self._raw = None
+
+    @staticmethod
+    def user_agent():
+        """
+        A static method which returns a random user agent for sending with each request.
+
+        User agents taken from this regularly updated resource. Refer to this to update where
+        required.
+        https://techblog.willshouse.com/2012/01/03/most-common-user-agents/
+        """
+        user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36",
+        ]
+        agent = random.choice(user_agents)
+
+        return agent
 
     def validate_product(self, product: int) -> bool:
         if not product:
@@ -110,10 +135,14 @@ class FuelWatch:
         payload['Day'] = day
 
         try:
-            response = requests.get(self.url, timeout=30, params=payload)
+            response = requests.get(
+                self.url,
+                timeout=30,
+                params=payload,
+                headers={"User-Agent": self.user_agent()},
+            )
             if response.status_code == 200:
                 self._raw = response.content
-                # return self._raw
                 return self._raw
         except Exception as e:
             print(e)
