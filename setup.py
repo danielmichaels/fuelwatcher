@@ -15,7 +15,7 @@ from os import path
 from setuptools import setup, find_packages
 
 NAME = 'fuelwatcher'
-VERSION = '0.2.2'
+VERSION = '0.2.3'
 DESCRIPTION = 'A simple XML scraper for FuelWatch.wa.gov.au fuel prices',
 URL = 'https://github.com/danielmichaels/fuelwatcher'
 DOWNLOAD_URL = (URL + '/tarball/' + VERSION)
@@ -56,10 +56,10 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6'
-        'Programming Language :: Python :: 3.7'
-        'Programming Language :: Python :: 3.8'
-        'Programming Language :: Python :: 3.9'
-        'Programming Language :: Python :: 3.10'
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ]
 )
