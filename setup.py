@@ -10,19 +10,20 @@ $ twine upload -r pypi dist/*
 """
 
 from codecs import open
-from setuptools import setup, find_packages
 from os import path
 
+from setuptools import setup, find_packages
+
 NAME = 'fuelwatcher'
-VERSION = '0.2.1'
+VERSION = '0.2.2'
 DESCRIPTION = 'A simple XML scraper for FuelWatch.wa.gov.au fuel prices',
 URL = 'https://github.com/danielmichaels/fuelwatcher'
 DOWNLOAD_URL = (URL + '/tarball/' + VERSION)
 AUTHOR = 'Daniel Michaels'
-AUTHOR_EMAIL = 'dans.address@outlook.com'
+AUTHOR_EMAIL = 'dan@danielms.site'
 REQUIRES_PYTHON = '>= Python 3.5'
 
-# Include what dependancies it requires:
+# Include what dependencies it requires:
 REQUIRED = [
     'requests'
 ]
@@ -56,5 +57,9 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.7'
+        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.9'
+        'Programming Language :: Python :: 3.10'
     ]
 )
