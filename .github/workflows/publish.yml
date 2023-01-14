@@ -6,6 +6,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  release:
+    types: [published]
 
 jobs:
   linting:
@@ -27,8 +29,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ "ubuntu-latest", "macos-latest" ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11"]
+        os: [ "ubuntu-latest" ]
+        python-version: [ "3.9", "3.10", "3.11"]
     runs-on: ubuntu-latest
     steps:
       #----------------------------------------------
@@ -76,3 +78,34 @@ jobs:
         run: |
           source .venv/bin/activate
           pytest tests/
+
+  publish:
+    needs: [linting, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip
+          restore-keys: ${{ runner.os }}-pip
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      - name: Install library
+        run: poetry install --no-interaction
+      - name: Publish to PyPI
+        if: endsWith(github.ref, 'master') == false
+        run: exit -1

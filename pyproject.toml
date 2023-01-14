@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fuelwatcher"
-version = "0.2.3"
+version = "v0.2.3"
 description = "A simple python module that scrapes XML data from the government of Western Australia's FuelWatch website that makes parsing a breeze."
 authors = ["Daniel Michaels <dan@danielms.site>"]
 license = "MIT"
