@@ -106,5 +106,5 @@ jobs:
       - name: Publish to PyPI
         run: poetry publish --build
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
           POETRY_HTTP_BASIC_PYPI_USERNAME: danielmichaels
+          POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
