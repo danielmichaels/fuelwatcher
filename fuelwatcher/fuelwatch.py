@@ -6,24 +6,29 @@
 
         Copyright (C) 2018, Daniel Michaels
 """
+import json
+import logging
 import random
-
-from .constants import PRODUCT, REGION, BRAND, SUBURB
 from xml.etree import ElementTree
 
-import logging
-import json
 import requests
+
+from .constants import BRAND, PRODUCT, REGION, SUBURB
 
 logging.basicConfig(level=logging.INFO)
 
 
 class FuelWatch:
-    """Client for FuelWatch RSS Feed. """
+    """Client for FuelWatch RSS Feed."""
 
-    def __init__(self,
-                 url='http://fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS',
-                 product=PRODUCT, region=REGION, brand=BRAND, suburb=SUBURB):
+    def __init__(
+        self,
+        url="http://fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS",
+        product=PRODUCT,
+        region=REGION,
+        brand=BRAND,
+        suburb=SUBURB,
+    ):
         self.url = url
         self._product = product
         self._region = region
@@ -80,9 +85,15 @@ class FuelWatch:
         else:
             assert suburb in self._suburb, "Invalid Suburb - Check Spelling"
 
-    def query(self, product: int = None, suburb: str = None,
-              region: int = None, brand: int = None, surrounding: str = None,
-              day: str = None):
+    def query(
+        self,
+        product: int = None,
+        suburb: str = None,
+        region: int = None,
+        brand: int = None,
+        surrounding: str = None,
+        day: str = None,
+    ):
         """
         Returns FuelWatch data based on query parameters
 
@@ -127,12 +138,12 @@ class FuelWatch:
         self.validate_suburb(suburb)
 
         payload = dict()
-        payload['Product'] = product
-        payload['Suburb'] = suburb
-        payload['Region'] = region
-        payload['Brand'] = brand
-        payload['Surrounding'] = surrounding
-        payload['Day'] = day
+        payload["Product"] = product
+        payload["Suburb"] = suburb
+        payload["Region"] = region
+        payload["Brand"] = brand
+        payload["Surrounding"] = surrounding
+        payload["Day"] = day
 
         try:
             response = requests.get(
@@ -170,24 +181,24 @@ class FuelWatch:
         """
 
         dom = ElementTree.fromstring(self._raw)
-        items = dom.findall('channel/item')
+        items = dom.findall("channel/item")
 
         self._xml = []
         for elem in items:
             dic = dict()
 
-            dic['title'] = elem.find('title').text
-            dic['description'] = elem.find('description').text
-            dic['brand'] = elem.find('brand').text
-            dic['date'] = elem.find('date').text
-            dic['price'] = elem.find('price').text
-            dic['trading-name'] = elem.find('trading-name').text
-            dic['location'] = elem.find('location').text
-            dic['address'] = elem.find('address').text
-            dic['phone'] = elem.find('phone').text
-            dic['latitude'] = elem.find('latitude').text
-            dic['longitude'] = elem.find('longitude').text
-            dic['site-features'] = elem.find('site-features').text
+            dic["title"] = elem.find("title").text
+            dic["description"] = elem.find("description").text
+            dic["brand"] = elem.find("brand").text
+            dic["date"] = elem.find("date").text
+            dic["price"] = elem.find("price").text
+            dic["trading-name"] = elem.find("trading-name").text
+            dic["location"] = elem.find("location").text
+            dic["address"] = elem.find("address").text
+            dic["phone"] = elem.find("phone").text
+            dic["latitude"] = elem.find("latitude").text
+            dic["longitude"] = elem.find("longitude").text
+            dic["site-features"] = elem.find("site-features").text
             self._xml.append(dic)
 
         return self._xml

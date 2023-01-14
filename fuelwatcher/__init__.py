@@ -1,2 +1,2 @@
+from fuelwatcher.constants import BRAND, PRODUCT, REGION, SUBURB
 from fuelwatcher.fuelwatch import FuelWatch
-from fuelwatcher.constants import REGION, SUBURB, BRAND, PRODUCT
