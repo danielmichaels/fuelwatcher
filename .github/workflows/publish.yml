@@ -1,7 +1,3 @@
-# Run this job on pushes to `main`, and for pull requests. If you don't specify
-# `branches: [main], then this actions runs _twice_ on pull requests, which is
-# annoying.
-
 on:
   push:
     branches: [main]
@@ -30,8 +26,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ "ubuntu-latest" ]
-#        python-version: [ "3.9", "3.10", "3.11"]
-        python-version: [ "3.11"]
+        python-version: [ "3.9", "3.10", "3.11"]
     runs-on: ubuntu-latest
     steps:
       #----------------------------------------------
