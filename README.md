@@ -1,23 +1,21 @@
 ```
-    ______           __               __       __             
+    ______           __               __       __
    / ____/_  _____  / /      ______ _/ /______/ /_  ___  _____
   / /_  / / / / _ \/ / | /| / / __ `/ __/ ___/ __ \/ _ \/ ___/
- / __/ / /_/ /  __/ /| |/ |/ / /_/ / /_/ /__/ / / /  __/ /    
-/_/    \__,_/\___/_/ |__/|__/\__,_/\__/\___/_/ /_/\___/_/     v 0.2.3
+ / __/ / /_/ /  __/ /| |/ |/ / /_/ / /_/ /__/ / / /  __/ /
+/_/    \__,_/\___/_/ |__/|__/\__,_/\__/\___/_/ /_/\___/_/
 ```
 
 # Fuelwatcher
 
 A simple python module that scrapes XML data from the government of Western Australia's FuelWatch website that makes parsing a breeze.
 
->Fuelwatch.wa.gov.au provides information on fuel prices by fuel type, location, brand and region within Western Australia. 
+> Fuelwatch.wa.gov.au provides information on fuel prices by fuel type, location, brand and region within Western Australia.
 > Fuelwatcher will parse the XML from the fuelwatch.wa.gov.au RSS feed giving the developer an easy way to manipulate the information.
 
 ## Installation
 
-Requires `pip` to be installed or `pip3` dependant on system, or environment. 
-
-**Python 3 only**
+Requires `pip` to be installed or `pip3` dependent on system, or environment.
 
 ```sh
 pip install fuelwatcher
@@ -36,7 +34,7 @@ api = FuelWatch()
 api.query(product=2, region=25, day='yesterday')
 
 # iterates over each fuel station entry in the byte string
-# and returns list of dictionaries in human readable text
+# and returns list of dictionaries in human-readable text
 xml_query = api.get_xml
 
 print(xml_query)
@@ -89,25 +87,25 @@ print(type(get_raw))
 
 ```
 
-The query method takes several keyword arguments. 
+The query method takes several keyword arguments.
 A query without any arguments will return *all* of today's Unleaded stations in Western Australia.
 
 As guide query takes the following kwargs
 
 ```python
-def query(self, product: int = None, suburb: str = None, region: int = None, 
+def query(self, product: int = None, suburb: str = None, region: int = None,
             brand: int = None, surrounding: str = None, day: str = None):
 ```
 
 **Note**
 
-If `suburb` is set then `surrounding` will default to `yes`. To get only the suburb, and not surrounding areas an explicit `surrounding='no'` must be called. 
+If `suburb` is set then `surrounding` will default to `yes`. To get only the suburb, and not surrounding areas an explicit `surrounding='no'` must be called.
 
 Setting `region` with `suburb` and `surrounding` will have unexpected results and are best not mixed together.
 
 Simply put, if you want just one `suburb` then set `surrounding='no'`, else leave the default. Only one `suburb` can be set per query. If a `region` is selected, do not set `surrounding` or `suburb`.
 
-A list of valid suburbs, brands, regions and products (fuel types) can be found in [constants.py](https://github.com/danielmichaels/fuelwatcher/blob/master/fuelwatcher/constants.py) 
+A list of valid suburbs, brands, regions and products (fuel types) can be found in [constants.py](https://github.com/danielmichaels/fuelwatcher/blob/master/fuelwatcher/constants.py)
 
 Fuelwatcher will run validation on the `query` method and throw AssertionError if an invalid integer or string is input
 

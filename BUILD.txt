@@ -1,0 +1,2 @@
+git tag -a v$(poetry version -s) -m "v$(poetry version -s)" -s
+git push origin --tags
