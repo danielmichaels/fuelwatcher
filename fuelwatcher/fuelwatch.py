@@ -220,8 +220,3 @@ class FuelWatch:
         self._json = json_results
 
         return self._json
-
-
-api = FuelWatch()
-api.query(product=2, region=25, day="yesterday")
-print(api.get_xml)
