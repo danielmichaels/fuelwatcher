@@ -104,7 +104,4 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction
       - name: Publish to PyPI
-        run: poetry publish --build
-        env:
-          POETRY_HTTP_BASIC_PYPI_USERNAME: danielmichaels
-          POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: poetry publish --build -u danielmichaels -p ${{ secrets.PYPI_API_TOKEN }}
