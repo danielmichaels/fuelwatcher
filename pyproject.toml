@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "fuelwatcher"
+version = "0.2.3"
+description = "A simple python module that scrapes XML data from the government of Western Australia's FuelWatch website that makes parsing a breeze."
+authors = ["Daniel Michaels <dan@danielms.site>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/danielmichaels/fuelwatcher"
+repository = "https://github.com/danielmichaels/fuelwatcher"
+exclude = ["tests/"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.28.2"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.21.0"
+pytest = "^7.2.0"
+black = "^22.12.0"
+isort = "^5.11.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"

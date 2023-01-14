@@ -4,7 +4,7 @@
 
     <https://www.fuelwatch.wa.gov.au>
 
-        Copyright (C) 2018, Daniel Michaels
+        Copyright (C) 2018-2023, Daniel Michaels
 """
 import json
 import logging
@@ -13,7 +13,7 @@ from xml.etree import ElementTree
 
 import requests
 
-from .constants import BRAND, PRODUCT, REGION, SUBURB
+from fuelwatcher import BRAND, PRODUCT, REGION, SUBURB
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,11 +29,11 @@ class FuelWatch:
         brand=BRAND,
         suburb=SUBURB,
     ):
-        self.url = url
-        self._product = product
-        self._region = region
-        self._brand = brand
-        self._suburb = suburb
+        self.url: str = url
+        self._product: int = product
+        self._region: int = region
+        self._brand: int = brand
+        self._suburb: str = suburb
         self._json = None
         self._xml = None
         self._raw = None
@@ -61,25 +61,25 @@ class FuelWatch:
 
         return agent
 
-    def validate_product(self, product: int) -> bool:
+    def _validate_product(self, product: int) -> bool:
         if not product:
             return True
         else:
             assert product in self._product, "Invalid Product Integer."
 
-    def validate_region(self, region: int) -> bool:
+    def _validate_region(self, region: int) -> bool:
         if not region:
             return True
         else:
             assert region in self._region, "Invalid Region Specified."
 
-    def validate_brand(self, brand: int) -> bool:
+    def _validate_brand(self, brand: int) -> bool:
         if not brand:
             return True
         else:
             assert brand in self._brand, "Invalid Brand."
 
-    def validate_suburb(self, suburb: str) -> bool:
+    def _validate_suburb(self, suburb: str) -> bool:
         if not suburb:
             return True
         else:
@@ -132,18 +132,19 @@ class FuelWatch:
         :return: byte-string content of url
         """
 
-        self.validate_product(product)
-        self.validate_brand(brand)
-        self.validate_region(region)
-        self.validate_suburb(suburb)
+        self._validate_product(product)
+        self._validate_brand(brand)
+        self._validate_region(region)
+        self._validate_suburb(suburb)
 
-        payload = dict()
-        payload["Product"] = product
-        payload["Suburb"] = suburb
-        payload["Region"] = region
-        payload["Brand"] = brand
-        payload["Surrounding"] = surrounding
-        payload["Day"] = day
+        payload = {
+            "Product": product,
+            "Suburb": suburb,
+            "Region": region,
+            "Brand": brand,
+            "Surrounding": surrounding,
+            "Day": day,
+        }
 
         try:
             response = requests.get(
@@ -155,15 +156,22 @@ class FuelWatch:
             if response.status_code == 200:
                 self._raw = response.content
                 return self._raw
+            else:
+                logging.log(
+                    logging.WARN,
+                    msg=f"Failed to get valid response from fuelwatcher website. Response: {response.status_code}",
+                )
         except Exception as e:
+            logging.log(
+                logging.ERROR,
+                msg="Failed to retrieve response from fuelwatcher website",
+            )
             print(e)
 
     @property
     def get_raw(self):
         """
         Returns the full RSS response unparsed.
-
-        :param result: url response.content from FuelWatch.query()
 
         :return: byte string full RSS XML response
         """
@@ -175,8 +183,6 @@ class FuelWatch:
         Given page content parses through the RSS XML and returns only 'item'
         data which contains fuel station information.
 
-        :param result: url response.content from FuelWatch.query()
-
         :return: a list of dictionaries from the XML content.
         """
 
@@ -185,28 +191,37 @@ class FuelWatch:
 
         self._xml = []
         for elem in items:
-            dic = dict()
+            d = {
+                "title": elem.find("title").text,
+                "description": elem.find("description").text,
+                "brand": elem.find("brand").text,
+                "date": elem.find("date").text,
+                "price": elem.find("price").text,
+                "trading-name": elem.find("trading-name").text,
+                "location": elem.find("location").text,
+                "address": elem.find("address").text,
+                "phone": elem.find("phone").text,
+                "latitude": elem.find("latitude").text,
+                "longitude": elem.find("longitude").text,
+                "site-features": elem.find("site-features").text,
+            }
 
-            dic["title"] = elem.find("title").text
-            dic["description"] = elem.find("description").text
-            dic["brand"] = elem.find("brand").text
-            dic["date"] = elem.find("date").text
-            dic["price"] = elem.find("price").text
-            dic["trading-name"] = elem.find("trading-name").text
-            dic["location"] = elem.find("location").text
-            dic["address"] = elem.find("address").text
-            dic["phone"] = elem.find("phone").text
-            dic["latitude"] = elem.find("latitude").text
-            dic["longitude"] = elem.find("longitude").text
-            dic["site-features"] = elem.find("site-features").text
-            self._xml.append(dic)
+            self._xml.append(d)
 
         return self._xml
 
     @property
     def get_json(self):
+        """
+        Convert the xml response into json.
+        """
         xml = self.get_xml
         json_results = json.dumps(xml, indent=4, ensure_ascii=True)
         self._json = json_results
 
         return self._json
+
+
+api = FuelWatch()
+api.query(product=2, region=25, day="yesterday")
+print(api.get_xml)
