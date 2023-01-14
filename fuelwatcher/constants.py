@@ -4,7 +4,8 @@ PRODUCT = {
     4: "Diesel",
     5: "LPG",
     6: "98 RON",
-    7: "B20 Diesel",
+    10: "E85",
+    11: "Brand diesel",
 }
 
 REGION = {
@@ -63,6 +64,11 @@ REGION = {
     54: "Williams",
     55: "Wubin",
     56: "York",
+    57: "Regans Ford",
+    58: "Meckering",
+    59: "Wundowie",
+    60: "North Bannister",
+    61: "Munglinup",
 }
 
 BRAND = {
@@ -78,12 +84,18 @@ BRAND = {
     13: "Peak",
     14: "Shell",
     15: "Independent",
-    16: "Wesco",
     19: "Caltex Woolworths",
     20: "Coles Express",
-    21: "Black & White",
     23: "United",
     24: "Eagle",
+    25: "FastFuel 24/7",
+    26: "Puma",
+    27: "Vibe",
+    29: "7-Eleven",
+    30: "Metro Petroleum",
+    31: "WA Fuels",
+    32: "Costco",
+    33: "Mogas",
 }
 
 SUBURB = [
