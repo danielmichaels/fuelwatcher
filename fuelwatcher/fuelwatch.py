@@ -6,6 +6,7 @@
 
         Copyright (C) 2018-2023, Daniel Michaels
 """
+
 import json
 import logging
 import random
