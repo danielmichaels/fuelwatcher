@@ -4,9 +4,8 @@ Data models and exceptions for FuelWatch.
 Copyright (C) 2018-2025, Daniel Michaels
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
+from typing import Self
 
 
 class FuelWatchError(Exception):
@@ -70,7 +69,7 @@ class FuelStation:
         }
 
     @classmethod
-    def from_xml_dict(cls, data: dict[str, str | None]) -> FuelStation:
+    def from_xml_dict(cls, data: dict[str, str | None]) -> Self:
         """Create a FuelStation from XML-style dictionary with hyphenated keys.
 
         Args:

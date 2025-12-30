@@ -7,8 +7,6 @@ Australian governments Fuel Watch initiative.
     Copyright (C) 2018-2026, Daniel Michaels
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import warnings
