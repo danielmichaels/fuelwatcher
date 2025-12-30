@@ -1,10 +1,10 @@
 """
-    fuelwatcher - A python module for scraping XML data from the Western
-    Australian governments Fuel Watch initiative.
+fuelwatcher - A python module for scraping XML data from the Western
+Australian governments Fuel Watch initiative.
 
-    <https://www.fuelwatch.wa.gov.au>
+<https://www.fuelwatch.wa.gov.au>
 
-        Copyright (C) 2018-2023, Daniel Michaels
+    Copyright (C) 2018-2023, Daniel Michaels
 """
 
 import json
