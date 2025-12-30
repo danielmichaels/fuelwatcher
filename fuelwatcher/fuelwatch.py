@@ -4,146 +4,150 @@ Australian governments Fuel Watch initiative.
 
 <https://www.fuelwatch.wa.gov.au>
 
-    Copyright (C) 2018-2023, Daniel Michaels
+    Copyright (C) 2018-2026, Daniel Michaels
 """
 
 import json
 import logging
-import random
+import warnings
+from collections.abc import Mapping
 from xml.etree import ElementTree
 
 import requests
+from fake_useragent import UserAgent
 
 from fuelwatcher import BRAND, PRODUCT, REGION, SUBURB
+from fuelwatcher.models import FuelStation, FuelWatchError
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class FuelWatch:
-    """Client for FuelWatch RSS Feed."""
+    """Client for FuelWatch RSS Feed.
+
+    Example:
+        >>> api = FuelWatch()
+        >>> api.query(product=1, region=25)
+        >>> for station in api.stations:
+        ...     print(f"{station.trading_name}: ${station.price}")
+    """
 
     def __init__(
         self,
-        url="http://fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS",
-        product=PRODUCT,
-        region=REGION,
-        brand=BRAND,
-        suburb=SUBURB,
-    ):
+        url: str = "https://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS",
+        product: Mapping[int, str] = PRODUCT,
+        region: Mapping[int, str] = REGION,
+        brand: Mapping[int, str] = BRAND,
+        suburb: list[str] = SUBURB,
+    ) -> None:
+        """Initialize FuelWatch client.
+
+        Args:
+            url: FuelWatch RSS feed URL
+            product: Valid product ID mapping (for validation)
+            region: Valid region ID mapping (for validation)
+            brand: Valid brand ID mapping (for validation)
+            suburb: Valid suburb names list (for validation)
+        """
         self.url: str = url
-        self._product: int = product
-        self._region: int = region
-        self._brand: int = brand
-        self._suburb: str = suburb
-        self._json = None
-        self._xml = None
-        self._raw = None
+        self._product: Mapping[int, str] = product
+        self._region: Mapping[int, str] = region
+        self._brand: Mapping[int, str] = brand
+        self._suburb: list[str] = suburb
+        self._json: str | None = None
+        self._xml: list[dict[str, str | None]] | None = None
+        self._raw: bytes | None = None
+        self._stations: list[FuelStation] | None = None
+        self._ua = UserAgent()
 
     @staticmethod
-    def user_agent():
+    def user_agent() -> str:
+        """Return a random user agent string.
+
+        Returns:
+            Random browser user agent string.
         """
-        A static method which returns a random user agent for sending with each request.
+        return UserAgent().random
 
-        User agents taken from this regularly updated resource. Refer to this to update where
-        required.
-        https://techblog.willshouse.com/2012/01/03/most-common-user-agents/
-        """
-        user_agents = [
-            "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36",
-        ]
-        agent = random.choice(user_agents)
+    def _validate_product(self, product: int | None) -> None:
+        """Validate product ID."""
+        if product is not None and product not in self._product:
+            valid = ", ".join(f"{k}: {v}" for k, v in self._product.items())
+            raise FuelWatchError(
+                f"Invalid product ID: {product}. Valid options: {valid}"
+            )
 
-        return agent
+    def _validate_region(self, region: int | None) -> None:
+        """Validate region ID."""
+        if region is not None and region not in self._region:
+            raise FuelWatchError(f"Invalid region ID: {region}")
 
-    def _validate_product(self, product: int) -> bool:
-        if not product:
-            return True
-        else:
-            assert product in self._product, "Invalid Product Integer."
+    def _validate_brand(self, brand: int | None) -> None:
+        """Validate brand ID."""
+        if brand is not None and brand not in self._brand:
+            raise FuelWatchError(f"Invalid brand ID: {brand}")
 
-    def _validate_region(self, region: int) -> bool:
-        if not region:
-            return True
-        else:
-            assert region in self._region, "Invalid Region Specified."
-
-    def _validate_brand(self, brand: int) -> bool:
-        if not brand:
-            return True
-        else:
-            assert brand in self._brand, "Invalid Brand."
-
-    def _validate_suburb(self, suburb: str) -> bool:
-        if not suburb:
-            return True
-        else:
-            assert suburb in self._suburb, "Invalid Suburb - Check Spelling"
+    def _validate_suburb(self, suburb: str | None) -> None:
+        """Validate suburb name."""
+        if suburb is not None and suburb not in self._suburb:
+            raise FuelWatchError(f"Invalid suburb: {suburb}")
 
     def query(
         self,
-        product: int = None,
-        suburb: str = None,
-        region: int = None,
-        brand: int = None,
-        surrounding: str = None,
-        day: str = None,
-    ):
+        product: int | None = None,
+        suburb: str | None = None,
+        region: int | None = None,
+        brand: int | None = None,
+        surrounding: bool | str | None = None,
+        day: str | None = None,
+    ) -> bytes:
+        """Query FuelWatch for fuel price data.
+
+        If all parameters are None, returns all stations with product
+        set to Unleaded Petrol.
+
+        Args:
+            product: Fuel type ID:
+                1 - Unleaded Petrol, 2 - Premium Unleaded,
+                4 - Diesel, 5 - LPG, 6 - 98 RON,
+                10 - E85, 11 - Brand diesel
+            suburb: Western Australian suburb name
+            region: FuelWatch region ID (see REGION constant)
+            brand: Fuel brand ID (see BRAND constant)
+            surrounding: Include surrounding suburbs. Accepts bool (True/False)
+                or str ('yes'/'no'). Defaults to 'yes' when suburb is set.
+            day: Date filter - 'today' (default), 'tomorrow' (after 2:30PM),
+                'yesterday', or 'DD/MM/YYYY' (max 1 week old)
+
+        Returns:
+            Raw XML response as bytes
+
+        Raises:
+            FuelWatchError: If validation fails or request fails
         """
-        Returns FuelWatch data based on query parameters
-
-        If all parameters are None it will return all stations with
-        product set to Unleaded Petrol.
-
-        :param product: Takes in a integer from the following table.
-        1 - Unleaded Petrol     2 - Premium Unleaded
-        4 - Diesel              5 - LPG
-        6 - 98 RON              10 - E85
-        11 - Brand diesel
-
-        :param suburb: Takes a valid Western Australian suburb.
-
-        Full list found in utils.suburbs
-
-        :param region: FuelWatch seperates WA into regions that take an
-
-        integer. Refer to utils.region for a listing.
-
-        :param brand: Takes in any valid registered WA fuel station. Refer to
-        utils.brand for the full list.
-
-        :param surrounding: boolean 'yes/no' that will return surrounding
-        suburbs when used in conjuction with the suburb parameter. Must be set
-        to 'no' explicitly, otherwise returns True.
-
-        :param day: Capable of four argument types:
-            - today (this is the default)
-            - tomorrow (only available after 2:30PM)
-            - yesterday
-            - DD/MM/YYYY (only prices for the last week, e.g. 23/08/2016)
-
-            returns today if not set.
-
-        :return: byte-string content of url
-        """
-
         self._validate_product(product)
         self._validate_brand(brand)
         self._validate_region(region)
         self._validate_suburb(suburb)
+
+        # Reset cached data
+        self._xml = None
+        self._json = None
+        self._stations = None
+
+        # Handle bool surrounding parameter
+        surrounding_str: str | None = None
+        if isinstance(surrounding, bool):
+            surrounding_str = "yes" if surrounding else "no"
+        elif surrounding is not None:
+            surrounding_str = surrounding
 
         payload = {
             "Product": product,
             "Suburb": suburb,
             "Region": region,
             "Brand": brand,
-            "Surrounding": surrounding,
+            "Surrounding": surrounding_str,
             "Day": day,
         }
 
@@ -152,72 +156,144 @@ class FuelWatch:
                 self.url,
                 timeout=30,
                 params=payload,
-                headers={"User-Agent": self.user_agent()},
+                headers={"User-Agent": self._ua.random},
             )
-            if response.status_code == 200:
-                self._raw = response.content
-                return self._raw
-            else:
-                logging.log(
-                    logging.WARN,
-                    msg=f"Failed to get valid response from fuelwatcher website. Response: {response.status_code}",
-                )
-        except Exception as e:
-            logging.log(
-                logging.ERROR,
-                msg="Failed to retrieve response from fuelwatcher website",
+            response.raise_for_status()
+            self._raw = response.content
+            return self._raw
+        except requests.HTTPError as e:
+            logger.warning(
+                "Failed to get valid response from FuelWatch. Status: %s",
+                e.response.status_code if e.response else "unknown",
             )
-            print(e)
+            raise FuelWatchError(
+                f"HTTP error from FuelWatch: {e.response.status_code if e.response else 'unknown'}"
+            ) from e
+        except requests.RequestException as e:
+            logger.exception("Failed to retrieve response from FuelWatch")
+            raise FuelWatchError(f"Request failed: {e}") from e
 
-    @property
-    def get_raw(self):
-        """
-        Returns the full RSS response unparsed.
-
-        :return: byte string full RSS XML response
-        """
-        return self._raw
-
-    @property
-    def get_xml(self):
-        """
-        Given page content parses through the RSS XML and returns only 'item'
-        data which contains fuel station information.
-
-        :return: a list of dictionaries from the XML content.
-        """
+    def _parse_xml(self) -> list[dict[str, str | None]]:
+        """Parse raw XML response into list of dictionaries."""
+        if self._raw is None:
+            raise FuelWatchError("No data available. Call query() first.")
 
         dom = ElementTree.fromstring(self._raw)
         items = dom.findall("channel/item")
 
-        self._xml = []
+        result: list[dict[str, str | None]] = []
         for elem in items:
             d = {
-                "title": elem.find("title").text,
-                "description": elem.find("description").text,
-                "brand": elem.find("brand").text,
-                "date": elem.find("date").text,
-                "price": elem.find("price").text,
-                "trading-name": elem.find("trading-name").text,
-                "location": elem.find("location").text,
-                "address": elem.find("address").text,
-                "phone": elem.find("phone").text,
-                "latitude": elem.find("latitude").text,
-                "longitude": elem.find("longitude").text,
-                "site-features": elem.find("site-features").text,
+                "title": elem.findtext("title"),
+                "description": elem.findtext("description"),
+                "brand": elem.findtext("brand"),
+                "date": elem.findtext("date"),
+                "price": elem.findtext("price"),
+                "trading-name": elem.findtext("trading-name"),
+                "location": elem.findtext("location"),
+                "address": elem.findtext("address"),
+                "phone": elem.findtext("phone"),
+                "latitude": elem.findtext("latitude"),
+                "longitude": elem.findtext("longitude"),
+                "site-features": elem.findtext("site-features"),
             }
+            result.append(d)
 
-            self._xml.append(d)
+        return result
 
+    @property
+    def raw(self) -> bytes | None:
+        """Raw RSS XML response as bytes."""
+        return self._raw
+
+    @property
+    def xml(self) -> list[dict[str, str | None]]:
+        """Parsed XML as list of dictionaries.
+
+        Returns:
+            List of station data dictionaries with hyphenated keys.
+
+        Raises:
+            FuelWatchError: If no data available (query() not called).
+        """
+        if self._xml is None:
+            self._xml = self._parse_xml()
         return self._xml
 
     @property
-    def get_json(self):
-        """
-        Convert the xml response into json.
-        """
-        xml = self.get_xml
-        json_results = json.dumps(xml, indent=4, ensure_ascii=True)
-        self._json = json_results
+    def json(self) -> str:
+        """JSON string representation of the data.
 
+        Returns:
+            JSON-formatted string with 4-space indent.
+
+        Raises:
+            FuelWatchError: If no data available (query() not called).
+        """
+        if self._json is None:
+            self._json = json.dumps(self.xml, indent=4, ensure_ascii=True)
         return self._json
+
+    @property
+    def stations(self) -> list[FuelStation]:
+        """List of FuelStation instances.
+
+        Provides typed access to station data with IDE autocomplete support.
+
+        Returns:
+            List of FuelStation instances.
+
+        Raises:
+            FuelWatchError: If no data available (query() not called).
+
+        Example:
+            >>> api = FuelWatch()
+            >>> api.query(product=1)
+            >>> for station in api.stations:
+            ...     print(f"{station.trading_name}: ${station.price}")
+        """
+        if self._stations is None:
+            self._stations = [FuelStation.from_xml_dict(d) for d in self.xml]
+        return self._stations
+
+    @property
+    def get_raw(self) -> bytes | None:
+        """Return raw RSS response.
+
+        .. deprecated:: 1.0.0
+            Use :attr:`raw` instead.
+        """
+        warnings.warn(
+            "get_raw is deprecated, use 'raw' property instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.raw
+
+    @property
+    def get_xml(self) -> list[dict[str, str | None]]:
+        """Parse RSS XML into list of dictionaries.
+
+        .. deprecated:: 1.0.0
+            Use :attr:`xml` or :attr:`stations` instead.
+        """
+        warnings.warn(
+            "get_xml is deprecated, use 'xml' or 'stations' property instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.xml
+
+    @property
+    def get_json(self) -> str:
+        """Convert XML response to JSON string.
+
+        .. deprecated:: 1.0.0
+            Use :attr:`json` instead.
+        """
+        warnings.warn(
+            "get_json is deprecated, use 'json' property instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.json
