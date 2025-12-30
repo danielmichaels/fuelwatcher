@@ -5,7 +5,7 @@ description = "A simple python module that scrapes XML data from the government 
 authors = [{name = "Daniel Michaels", email = "dan@danielms.site"}]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "requests>=2.28.2",
     "fake-useragent>=1.5.1",
@@ -32,7 +32,7 @@ packages = ["fuelwatcher"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
