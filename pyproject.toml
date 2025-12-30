@@ -1,6 +1,6 @@
 [project]
 name = "fuelwatcher"
-version = "0.4.0"
+version = "1.0.0"
 description = "A simple python module that scrapes XML data from the government of Western Australia's FuelWatch website that makes parsing a breeze."
 authors = [{name = "Daniel Michaels", email = "dan@danielms.site"}]
 license = {text = "MIT"}
@@ -8,6 +8,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "requests>=2.28.2",
+    "fake-useragent>=1.5.1",
 ]
 
 [project.urls]

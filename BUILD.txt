@@ -1,6 +1,27 @@
-git tag -a $(poetry version -s) -m "$(poetry version -s)" -s
-git push origin --tags
+# Release Process
 
-Created wrong tag?
+Publishing is automated via GitHub Actions when a version tag is pushed.
+
+## Create a release
+
+1. Update version in pyproject.toml
+2. Commit changes
+3. Create and push signed tag:
+
+```bash
+VERSION=$(grep '^version' pyproject.toml | cut -d'"' -f2)
+git tag -a "v${VERSION}" -m "v${VERSION}" -s
+git push origin --tags
+```
+
+CI will automatically:
+- Run linting (ruff)
+- Run tests on Python 3.9-3.13
+- Build and publish to PyPI
+
+## Wrong tag?
+
+```bash
 git tag -d <version>
 git push --delete origin <version>
+```

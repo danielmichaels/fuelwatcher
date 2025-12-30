@@ -23,98 +23,138 @@ pip install fuelwatcher
 
 ## Usage example
 
-### Basic Usage
+### Basic Usage (Recommended)
+
+The recommended way to access fuel station data is via the typed `stations` property, which returns a list of `FuelStation` dataclass instances:
 
 ```python
 from fuelwatcher import FuelWatch
 
 api = FuelWatch()
 
-# returns byte string of xml.
+# Query the API
 api.query(product=2, region=25, day='yesterday')
 
-# iterates over each fuel station entry in the byte string
-# and returns list of dictionaries in human-readable text
-xml_query = api.get_xml
-
-print(xml_query)
-
->>>> [{'title': '138.5: Puma Bayswater', 'description': 'Address: 502 Guildford Rd, BAYSWATER, Phone: (08) 9379 1322, Open 24 hours', 'brand': 'Puma', 'date': '2018-04-05', 'price': '138.5', 'trading-name': 'Puma Bayswater', 'location': 'BAYSWATER', 'address': '502 Guildford Rd', 'phone': '(08) 9379 1322', 'latitude': '-31.919556', 'longitude': '115.929069', 'site-features': ', Open 24 hours'} ..snip... '}]
-
-# python dictionary parsing
-print(xml_query[0]['title'])
->>>> '138.5: Puma Bayswater'
-
+# Access stations as typed dataclass instances
+for station in api.stations:
+    print(f"{station.trading_name}: ${station.price}")
+    print(f"  Address: {station.address}")
+    print(f"  Location: {station.latitude}, {station.longitude}")
 ```
 
-Fuelwatcher can also transform the XML into JSON format. It is as simple as calling the `get_json` method.
+The `FuelStation` dataclass provides IDE autocomplete and type safety:
 
 ```python
+from fuelwatcher import FuelStation
 
+# FuelStation fields:
+# - title, description, brand, date, price
+# - trading_name, location, address, phone
+# - latitude, longitude, site_features
+```
+
+### Alternative Access Methods
+
+**As list of dictionaries:**
+
+```python
 api = FuelWatch()
-
 api.query(region=1)
 
-json_response = api.get_json
-
->>>> [
->>>>   {
->>>>       "title": "143.9: United Boulder Kalgoorlie",
->>>>       "description": "Address: Cnr Lane St & Davis St, BOULDER, Phone: (08) 9093 1543",
->>>>       "brand": "United",
->>>>       "date": "2018-04-13",
->>>>       "price": "143.9",
->>>>       ... snip ...
->>>>       "longitude": "121.433746",
->>>>       "site-features": "Unmanned Station, "
->>>>   }
->>>> ]
+# Access as list of dicts
+stations = api.xml
+print(stations[0]['title'])
+>>> '143.9: United Boulder Kalgoorlie'
 ```
 
-For most operations the `get_xml()` or `get_json()` method will be sufficient. If the developer wants to parse the raw RSS XML then the `get_raw()` method is available.
-This will return bytes.
+**As JSON string:**
 
 ```python
-get_raw = api.get_raw
+api = FuelWatch()
+api.query(region=1)
 
-print(get_raw)
-
->>>> (b'<?xml version="1.0" encoding="UTF-8"?>\r\n<rss version="2.0"><channel><title>FuelWatch Prices For North of River</title><ttl>720</ttl><link>http://www.fuelwatch.wa.gov.au</link><description>05/04/2018 - North of River</description><language>en-us</language><copyright>Copyright 2005 FuelWatch... snip...</item></channel></rss>\r\n')
-
-print(type(get_raw))
-
->>>> <class 'bytes'>
-
+json_response = api.json
+>>> [
+>>>   {
+>>>       "title": "143.9: United Boulder Kalgoorlie",
+>>>       "description": "Address: Cnr Lane St & Davis St, BOULDER...",
+>>>       "brand": "United",
+>>>       ...
+>>>   }
+>>> ]
 ```
 
-The query method takes several keyword arguments.
-A query without any arguments will return *all* of today's Unleaded stations in Western Australia.
-
-As guide query takes the following kwargs
+**Raw XML bytes:**
 
 ```python
-def query(self, product: int = None, suburb: str = None, region: int = None,
-            brand: int = None, surrounding: str = None, day: str = None):
+api = FuelWatch()
+api.query(product=1)
+
+raw_xml = api.raw
+>>> b'<?xml version="1.0" encoding="UTF-8"?>...'
 ```
 
-**Note**
+### Query Parameters
 
-If `suburb` is set then `surrounding` will default to `yes`. To get only the suburb, and not surrounding areas an explicit `surrounding='no'` must be called.
+The `query` method takes several keyword arguments:
 
-Setting `region` with `suburb` and `surrounding` will have unexpected results and are best not mixed together.
+```python
+def query(
+    product: int = None,      # Fuel type ID
+    suburb: str = None,       # WA suburb name
+    region: int = None,       # Region ID
+    brand: int = None,        # Brand ID
+    surrounding: bool = None, # Include surrounding suburbs
+    day: str = None,          # 'today', 'tomorrow', 'yesterday', or 'DD/MM/YYYY'
+)
+```
 
-Simply put, if you want just one `suburb` then set `surrounding='no'`, else leave the default. Only one `suburb` can be set per query. If a `region` is selected, do not set `surrounding` or `suburb`.
+A query without any arguments returns *all* of today's Unleaded stations in Western Australia.
+
+**Notes:**
+
+- If `suburb` is set, `surrounding` defaults to `yes`. To get only the suburb, explicitly pass `surrounding=False`
+- Don't mix `region` with `suburb` and `surrounding` together
+- The `surrounding` parameter accepts both `bool` (`True`/`False`) and `str` (`'yes'`/`'no'`)
 
 A list of valid suburbs, brands, regions and products (fuel types) can be found in [constants.py](https://github.com/danielmichaels/fuelwatcher/blob/master/fuelwatcher/constants.py)
 
-Fuelwatcher will run validation on the `query` method and throw AssertionError if an invalid integer or string is input
+### Error Handling
+
+Fuelwatcher validates inputs and raises `FuelWatchError` for invalid parameters or failed requests:
 
 ```python
-api.query(product=20) # product=20 is invalid
+from fuelwatcher import FuelWatch, FuelWatchError
 
->>> .... error snippet....
->>> AssertionError: Invalid Product Integer.
+api = FuelWatch()
+
+try:
+    api.query(product=999)  # Invalid product ID
+except FuelWatchError as e:
+    print(f"Error: {e}")
+>>> Error: Invalid product ID: 999. Valid options: 1: Unleaded Petrol, 2: Premium Unleaded...
 ```
+
+### Backwards Compatibility
+
+The previous `get_*` property names are still supported but deprecated:
+
+```python
+# Deprecated (still works, emits DeprecationWarning)
+api.get_xml    # Use api.xml instead
+api.get_json   # Use api.json instead
+api.get_raw    # Use api.raw instead
+```
+
+**Migration guide:**
+
+| Old (deprecated) | New |
+|------------------|-----|
+| `api.get_xml` | `api.xml` or `api.stations` |
+| `api.get_json` | `api.json` |
+| `api.get_raw` | `api.raw` |
+| `AssertionError` | `FuelWatchError` |
+| `surrounding='yes'` | `surrounding=True` |
 
 ## Meta
 
