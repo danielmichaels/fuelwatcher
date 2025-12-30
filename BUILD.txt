@@ -10,7 +10,7 @@ Publishing is automated via GitHub Actions when a version tag is pushed.
 
 ```bash
 VERSION=$(grep '^version' pyproject.toml | cut -d'"' -f2)
-git tag -a "v${VERSION}" -m "v${VERSION}" -s
+git tag -a "${VERSION}" -m "${VERSION}" -s
 git push origin --tags
 ```
 
