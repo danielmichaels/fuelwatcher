@@ -1,27 +1,43 @@
-[tool.poetry]
+[project]
 name = "fuelwatcher"
-version = "v0.3.1"
+version = "0.4.0"
 description = "A simple python module that scrapes XML data from the government of Western Australia's FuelWatch website that makes parsing a breeze."
-authors = ["Daniel Michaels <dan@danielms.site>"]
-license = "MIT"
+authors = [{name = "Daniel Michaels", email = "dan@danielms.site"}]
+license = {text = "MIT"}
 readme = "README.md"
-homepage = "https://github.com/danielmichaels/fuelwatcher"
-repository = "https://github.com/danielmichaels/fuelwatcher"
-exclude = ["tests/"]
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.28.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-requests = "^2.28.2"
+[project.urls]
+Homepage = "https://github.com/danielmichaels/fuelwatcher"
+Repository = "https://github.com/danielmichaels/fuelwatcher"
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^2.21.0"
-pytest = "^7.2.0"
-black = "^22.12.0"
-isort = "^5.11.4"
+[dependency-groups]
+dev = [
+    "pre-commit>=2.21.0",
+    "pytest>=7.2.0",
+    "ruff>=0.8.0",
+    "ty>=0.0.8",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.isort]
-profile = "black"
+[tool.hatch.build.targets.wheel]
+packages = ["fuelwatcher"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"fuelwatcher/fuelwatch.py" = ["E501"]  # Allow long user-agent strings
+
+[tool.ruff.lint.isort]
+known-first-party = ["fuelwatcher"]

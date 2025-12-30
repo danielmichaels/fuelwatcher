@@ -116,28 +116,9 @@ api.query(product=20) # product=20 is invalid
 >>> AssertionError: Invalid Product Integer.
 ```
 
-## Release History
-
-* 0.2.1
-    * README.md updated
-* 0.2.0
-    * __Breaking Change!__
-    * @property added raw, xml and json methods
-    * json output now supported
-* 0.1.1
-    * Include correct packages in setup.py
-* 0.1.0
-    * First release live to PyPi
-* 0.1.0rc2
-    * Minor formatting fixes
-* 0.1.0rc1
-    * The first release candidate
-* 0.0.1
-    * Work in progress
-
 ## Meta
 
-Daniel Michaels – https://www.danielms.site
+Daniel Michaels – https://danielms.site
 
 Distributed under the MIT license. See ``LICENSE`` for more information.
 
