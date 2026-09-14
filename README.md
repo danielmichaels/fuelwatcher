@@ -33,7 +33,7 @@ from fuelwatcher import FuelWatch
 api = FuelWatch()
 
 # Query the API
-api.query(product=2, region=25, day='yesterday')
+api.query(product=2, region=25, day="yesterday")
 
 # Access stations as typed dataclass instances
 for station in api.stations:
@@ -141,9 +141,9 @@ The previous `get_*` property names are still supported but deprecated:
 
 ```python
 # Deprecated (still works, emits DeprecationWarning)
-api.get_xml    # Use api.xml instead
-api.get_json   # Use api.json instead
-api.get_raw    # Use api.raw instead
+api.get_xml  # Use api.xml instead
+api.get_json  # Use api.json instead
+api.get_raw  # Use api.raw instead
 ```
 
 **Migration guide:**
